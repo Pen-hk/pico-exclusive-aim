@@ -12,7 +12,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Install dependencies
+    - name: Install ARM toolchain
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
@@ -26,8 +26,12 @@ jobs:
         
     - name: Build
       run: |
-        export PICO_SDK_PATH=${{ github.workspace }}/pico-sdk
-        cmake -S . -B build -DPICO_SDK_PATH=$PICO_SDK_PATH
+        cmake -S . -B build \
+          -DPICO_SDK_PATH=${{ github.workspace }}/pico-sdk \
+          -DCMAKE_C_COMPILER=arm-none-eabi-gcc \
+          -DCMAKE_CXX_COMPILER=arm-none-eabi-g++ \
+          -DCMAKE_ASM_COMPILER=arm-none-eabi-gcc \
+          -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
         cmake --build build
 
     - name: Upload artifact
