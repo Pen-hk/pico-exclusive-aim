@@ -8,15 +8,26 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    container:
-      image: ghcr.io/raspberrypi/pico-sdk:1.5.1
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Install ARM toolchain
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
+        
+    - name: Checkout Pico SDK
+      run: |
+        git clone -b 1.5.1 https://github.com/raspberrypi/pico-sdk.git
+        cd pico-sdk
+        git submodule update --init
+        cd ..
+        
     - name: Build
       run: |
-        cmake -S . -B build
+        cmake -S . -B build \
+          -DPICO_SDK_PATH=${{ github.workspace }}/pico-sdk
         cmake --build build
 
     - name: Upload artifact
